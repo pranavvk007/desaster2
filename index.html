@@ -8,6 +8,9 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ════════════════════════════════════════════════════════
+       SHARED VARS
+    ════════════════════════════════════════════════════════ */
     :root {
       --bg:        #fefefe;
       --card:      #fcfcfc;
@@ -29,17 +32,202 @@
       --shadow:    0 4px 28px rgba(0,0,0,.09);
     }
 
+    html, body { height: 100%; }
+
     body {
       font-family: 'DM Sans', sans-serif;
       background: var(--bg);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 32px 16px 72px;
       color: var(--text);
     }
 
+    /* ════════════════════════════════════════════════════════
+       PAGE VISIBILITY CONTROL
+    ════════════════════════════════════════════════════════ */
+    #login-page   { display: flex; min-height: 100vh; }
+    #signup-page  { display: none; min-height: 100vh; }
+    #main-app     { display: none; flex-direction: column; align-items: center; padding: 32px 16px 72px; }
+
+    #login-page.active  { display: flex; }
+    #signup-page.active { display: flex; }
+    #main-app.active    { display: flex; }
+
+    /* ════════════════════════════════════════════════════════
+       LEFT PANEL  (shared by login + signup)
+    ════════════════════════════════════════════════════════ */
+    .auth-page {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    .left {
+      position: relative;
+      width: 54%;
+      min-height: 100vh;
+      background: #111;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+      padding: 48px 52px;
+      flex-shrink: 0;
+    }
+
+    #binaryCanvas, #binaryCanvas2 {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.45;
+    }
+
+    .hands-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.75;
+      mix-blend-mode: luminosity;
+    }
+
+    .left-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to top,
+        rgba(0,0,0,0.85) 0%,
+        rgba(0,0,0,0.3) 45%,
+        rgba(0,0,0,0.1) 100%
+      );
+    }
+
+    .left-text { position: relative; z-index: 2; }
+
+    .left-text h2 {
+      font-size: clamp(16px, 2vw, 22px);
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      line-height: 1.25;
+    }
+
+    .left-text p {
+      font-size: clamp(15px, 1.6vw, 20px);
+      font-weight: 400;
+      color: rgba(255,255,255,0.75);
+    }
+
+    /* ════════════════════════════════════════════════════════
+       RIGHT PANEL
+    ════════════════════════════════════════════════════════ */
+    .right {
+      width: 46%;
+      min-height: 100vh;
+      background: #f5f5f3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+
+    /* ════════════════════════════════════════════════════════
+       AUTH CARD
+    ════════════════════════════════════════════════════════ */
+    .auth-card {
+      width: 100%;
+      max-width: 482px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      padding: 44px 40px 40px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .auth-card h1 {
+      font-size: clamp(24px, 3vw, 32px);
+      font-weight: 700;
+      color: #000;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .auth-subtitle {
+      font-size: 13.5px;
+      color: #444;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .auth-fields {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+      margin-bottom: 26px;
+    }
+
+    .auth-fields input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #d8d8d8;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #333;
+      background: #fafafa;
+      outline: none;
+      font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .auth-fields input::placeholder { color: #aaa; }
+    .auth-fields input:focus { border-color: #999; background: #fff; }
+
+    .btn-auth {
+      width: 100%;
+      padding: 13px;
+      background: #000;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.2s;
+      margin-bottom: 14px;
+    }
+
+    .btn-auth:hover { background: #222; }
+
+    .auth-switch { font-size: 13.5px; color: #444; }
+    .auth-switch a {
+      font-weight: 700;
+      color: #000;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .auth-switch a:hover { text-decoration: underline; }
+
+    /* Error message */
+    .auth-error {
+      font-size: 13px;
+      color: var(--red);
+      margin-bottom: 12px;
+      display: none;
+    }
+    .auth-error.show { display: block; }
+
+    /* ════════════════════════════════════════════════════════
+       MAIN APP — reuse all existing styles from dashboard
+    ════════════════════════════════════════════════════════ */
+
+    /* ── Page header ── */
     .page-header {
       max-width: 1200px;
       width: 100%;
@@ -56,6 +244,47 @@
       color: var(--text);
     }
     .page-header p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+    .header-left  { display: flex; align-items: center; gap: 14px; flex: 1; }
+    .header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    /* Logout button */
+    .btn-logout {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--label);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .18s;
+    }
+    .btn-logout:hover { background: var(--red-lt); border-color: #f5c6c2; color: var(--red); }
+
+    /* Logged-in user badge */
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--accent-lt);
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      padding: 5px 12px 5px 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--label);
+    }
+    .user-avatar {
+      width: 22px; height: 22px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+
     .header-badge {
       display: flex;
       align-items: center;
@@ -82,11 +311,8 @@
       50%      { opacity:.5; transform:scale(1.3); }
     }
 
-    .nav-wrap {
-      max-width: 1200px;
-      width: 100%;
-      margin-bottom: 18px;
-    }
+    /* ── Nav tabs ── */
+    .nav-wrap { max-width: 1200px; width: 100%; margin-bottom: 18px; }
     .nav-tabs {
       display: flex;
       background: var(--card);
@@ -114,16 +340,10 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .nav-tabs button.active {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 2px 10px rgba(26,31,46,.25);
-    }
-    .nav-tabs button:not(.active):hover {
-      background: var(--accent-lt);
-      color: var(--accent);
-    }
+    .nav-tabs button.active { background: var(--accent); color: #fff; box-shadow: 0 2px 10px rgba(26,31,46,.25); }
+    .nav-tabs button:not(.active):hover { background: var(--accent-lt); color: var(--accent); }
 
+    /* ── Card ── */
     .card {
       background: var(--card);
       border-radius: var(--radius);
@@ -134,9 +354,9 @@
       overflow: hidden;
     }
 
+    /* ── Sections ── */
     .section-block { display: none; }
     .section-block.active { display: block; }
-
     .section-inner { padding: 26px 28px; }
     .section-inner + .section-inner { border-top: 1.5px dashed var(--border); }
 
@@ -149,31 +369,16 @@
       color: var(--muted);
       margin-bottom: 16px;
     }
-    .section-heading {
-      font-family: 'Sora', sans-serif;
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
+    .section-heading { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
     .section-sub { font-size: 13.5px; color: var(--muted); margin-bottom: 18px; }
 
-    .field-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-
+    /* ── Fields ── */
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
     .field-group { display: flex; flex-direction: column; gap: 6px; }
     .field-group label { font-size: 13px; font-weight: 500; color: var(--label); }
 
-    input[type="text"],
-    input[type="number"],
-    input[type="email"],
-    input[type="tel"],
-    select,
-    textarea {
+    input[type="text"], input[type="number"], input[type="email"],
+    input[type="tel"], select, textarea {
       width: 100%;
       padding: 10px 14px;
       border: 1.5px solid var(--border);
@@ -186,54 +391,31 @@
       transition: border-color .18s;
       -webkit-appearance: none;
     }
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--accent);
-      background: #fff;
-    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); background: #fff; }
     textarea { resize: vertical; min-height: 90px; }
 
     .select-wrap { position: relative; }
-    .select-wrap::after {
-      content: '▾';
-      position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
-      color: var(--muted); font-size: 12px; pointer-events: none;
-    }
+    .select-wrap::after { content: '▾'; position: absolute; right: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 12px; pointer-events: none; }
     .select-wrap select { padding-right: 32px; cursor: pointer; }
 
     .input-prefix { position: relative; }
-    .input-prefix span {
-      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
-      color: var(--muted); font-size: 14px; font-weight: 500; pointer-events: none;
-    }
+    .input-prefix span { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; font-weight: 500; pointer-events: none; }
     .input-prefix input { padding-left: 40px; }
 
-    .toggle-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 11px 0;
-    }
+    /* ── Toggle ── */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; }
     .toggle-row + .toggle-row { border-top: 1px solid var(--border); }
     .toggle-row-info span { font-size: 13.5px; font-weight: 500; color: var(--label); display: block; }
     .toggle-row-info small { font-size: 12px; color: var(--muted); margin-top: 1px; display: block; }
     .toggle { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
     .toggle input { opacity: 0; width: 0; height: 0; }
-    .toggle-track {
-      position: absolute; inset: 0;
-      background: var(--border); border-radius: 99px; cursor: pointer; transition: background .2s;
-    }
-    .toggle-track::after {
-      content: '';
-      position: absolute; width: 18px; height: 18px; background: #fff;
-      border-radius: 50%; top: 3px; left: 3px;
-      box-shadow: 0 1px 4px rgba(0,0,0,.2); transition: transform .2s;
-    }
+    .toggle-track { position: absolute; inset: 0; background: var(--border); border-radius: 99px; cursor: pointer; transition: background .2s; }
+    .toggle-track::after { content: ''; position: absolute; width: 18px; height: 18px; background: #fff; border-radius: 50%; top: 3px; left: 3px; box-shadow: 0 1px 4px rgba(0,0,0,.2); transition: transform .2s; }
     .toggle input:checked + .toggle-track { background: var(--accent); }
     .toggle input:checked + .toggle-track::after { transform: translateX(18px); }
 
-    .alert-banner {
-      display: flex; align-items: flex-start; gap: 13px;
-      padding: 14px 16px; border-radius: 10px; margin-bottom: 10px;
-      font-size: 13.5px; border: 1.5px solid;
-    }
+    /* ── Alert banners ── */
+    .alert-banner { display: flex; align-items: flex-start; gap: 13px; padding: 14px 16px; border-radius: 10px; margin-bottom: 10px; font-size: 13.5px; border: 1.5px solid; }
     .alert-banner.info    { border-color: #c3d4fb; background: var(--blue-lt); }
     .alert-banner.warning { border-color: #f5d89a; background: var(--amber-lt); }
     .alert-banner.danger  { border-color: #f5c6c2; background: var(--red-lt); }
@@ -244,32 +426,22 @@
     .alert-banner strong { display: block; font-weight: 600; margin-bottom: 2px; font-size: 13.5px; }
     .alert-banner p { color: var(--muted); font-size: 12.5px; }
 
+    /* ── Item list ── */
     .item-list { display: flex; flex-direction: column; gap: 10px; }
-    .item-card {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 16px; border: 1.5px solid var(--border);
-      border-radius: 10px; background: #fafbfc; gap: 12px;
-    }
+    .item-card { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 10px; background: #fafbfc; gap: 12px; }
     .item-card .ic-left { flex: 1; }
     .item-card .ic-name { font-weight: 600; font-size: 14px; }
     .item-card .ic-meta { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
-    .badge {
-      font-size: 11.5px; font-weight: 600; padding: 4px 12px;
-      border-radius: 99px; flex-shrink: 0;
-    }
+    .badge { font-size: 11.5px; font-weight: 600; padding: 4px 12px; border-radius: 99px; flex-shrink: 0; }
     .badge.ok     { background: var(--green-lt); color: var(--green); border: 1px solid #a7d9b8; }
     .badge.full   { background: var(--accent); color: #fff; }
     .badge.active { background: var(--blue-lt); color: var(--blue); border: 1px solid #b3c8fa; }
     .badge.warn   { background: var(--amber-lt); color: var(--amber); border: 1px solid #f5d89a; }
 
+    /* ── Stat grid ── */
     .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
-    .stat-card {
-      padding: 16px; border-radius: 12px; border: 1.5px solid var(--border); background: #fafbfc;
-      text-align: center;
-    }
-    .stat-card .stat-val {
-      font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 800; color: var(--text); line-height: 1;
-    }
+    .stat-card { padding: 16px; border-radius: 12px; border: 1.5px solid var(--border); background: #fafbfc; text-align: center; }
+    .stat-card .stat-val { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 800; color: var(--text); line-height: 1; }
     .stat-card .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
     .stat-card.red-card   { background: var(--red-lt);   border-color: #f5c6c2; }
     .stat-card.amber-card { background: var(--amber-lt); border-color: #f5d89a; }
@@ -278,60 +450,85 @@
     .stat-card.amber-card .stat-val { color: var(--amber); }
     .stat-card.green-card .stat-val { color: var(--green); }
 
+    /* ── Tip grid ── */
     .tip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .tip-card {
-      padding: 16px; border-radius: 12px; border: 1.5px solid var(--border); background: #fafbfc;
-    }
+    .tip-card { padding: 16px; border-radius: 12px; border: 1.5px solid var(--border); background: #fafbfc; }
     .tip-card .tip-title { font-weight: 600; font-size: 13.5px; margin-bottom: 5px; }
     .tip-card .tip-desc  { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
 
+    /* ── Do/Don't ── */
     .dos-donts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .list-col h4 { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
     .list-col ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
-    .list-col ul li {
-      font-size: 13px; color: var(--label); padding: 8px 12px;
-      border-radius: 8px; display: flex; align-items: flex-start; gap: 8px;
-    }
+    .list-col ul li { font-size: 13px; color: var(--label); padding: 8px 12px; border-radius: 8px; display: flex; align-items: flex-start; gap: 8px; }
     .dos-col ul li  { background: var(--green-lt); }
     .dont-col ul li { background: var(--red-lt); }
     .list-col ul li::before { font-size: 13px; flex-shrink: 0; margin-top: 1px; font-weight: 700; }
     .dos-col ul li::before  { content: '✓'; color: var(--green); }
     .dont-col ul li::before { content: '✕'; color: var(--red); }
 
+    /* ── Helplines ── */
     .helpline-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .helpline-card {
-      padding: 16px; border-radius: 12px; border: 1.5px solid var(--border); background: #fafbfc;
-    }
+    .helpline-card { padding: 16px; border-radius: 12px; border: 1.5px solid var(--border); background: #fafbfc; }
     .helpline-name { font-weight: 600; font-size: 13px; color: var(--muted); }
     .helpline-num  { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; color: var(--accent); margin-top: 4px; }
 
-    .volunteer-box {
-      padding: 18px; border-radius: 12px; border: 1.5px dashed var(--border); background: #fafbfc;
-      margin-top: 16px;
-    }
+    /* ── Volunteer box ── */
+    .volunteer-box { padding: 18px; border-radius: 12px; border: 1.5px dashed var(--border); background: #fafbfc; margin-top: 16px; }
     .volunteer-box .vb-title { font-weight: 600; font-size: 14px; margin-bottom: 12px; }
 
+    /* ── Contact grid ── */
     .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
-    .contact-info-card {
-      padding: 14px 16px; border-radius: 12px; border: 1.5px solid var(--border); background: #fafbfc;
-    }
+    .contact-info-card { padding: 14px 16px; border-radius: 12px; border: 1.5px solid var(--border); background: #fafbfc; }
     .contact-info-card .ci-label { font-size: 12px; color: var(--muted); }
     .contact-info-card .ci-value { font-size: 13.5px; font-weight: 500; margin-top: 3px; }
 
-    .card-footer {
-      display: flex; align-items: center; justify-content: flex-end; gap: 10px;
-      padding: 16px 28px; border-top: 1px solid var(--border); background: #fafbfc;
-    }
-    .btn {
-      padding: 10px 22px; border-radius: 10px;
-      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
-      cursor: pointer; border: 1.5px solid transparent; transition: all .18s;
-    }
-    .btn-ghost  { background: transparent; border-color: var(--border); color: var(--label); }
+    /* ── Footer actions ── */
+    .card-footer { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 16px 28px; border-top: 1px solid var(--border); background: #fafbfc; }
+    .btn { padding: 10px 22px; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; border: 1.5px solid transparent; transition: all .18s; }
+    .btn-ghost   { background: transparent; border-color: var(--border); color: var(--label); }
     .btn-ghost:hover { background: var(--bg); }
     .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(26,31,46,.2); }
     .btn-primary:hover { background: #2f3650; }
 
+    /* ── Weather widget ── */
+    .weather-widget {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #ffffff; border: 1.5px solid var(--wx-border, var(--border));
+      border-radius: 99px; padding: 5px 12px 5px 7px;
+      box-shadow: 0 2px 8px var(--wx-shadow, rgba(0,0,0,.06));
+      flex-shrink: 0; white-space: nowrap; transition: border-color .4s, box-shadow .2s;
+    }
+    .weather-widget.wx-sunny  { --wx-border:#fcd34d; --wx-shadow:rgba(251,191,36,.22); }
+    .weather-widget.wx-cloudy { --wx-border:#cbd5e1; --wx-shadow:rgba(100,116,139,.15); }
+    .weather-widget.wx-rain   { --wx-border:#93c5fd; --wx-shadow:rgba(59,130,246,.18); }
+    .weather-widget.wx-storm  { --wx-border:#a78bfa; --wx-shadow:rgba(109,40,217,.18); }
+    .weather-widget.wx-snow   { --wx-border:#7dd3fc; --wx-shadow:rgba(14,165,233,.16); }
+    .weather-widget.wx-haze   { --wx-border:#fde68a; --wx-shadow:rgba(234,179,8,.16); }
+    .weather-widget.wx-night  { --wx-border:#334155; --wx-shadow:rgba(0,0,0,.22); }
+    .weather-icon-wrap { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .weather-icon-wrap img { width: 24px; height: 24px; object-fit: contain; margin: -2px; }
+    .weather-info { display: flex; align-items: center; gap: 4px; }
+    .weather-temp { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; color: var(--text); line-height: 1; }
+    .weather-sep  { font-size: 12px; color: var(--muted); line-height: 1; }
+    .weather-meta { font-size: 12px; font-weight: 500; color: var(--label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; line-height: 1; }
+    .weather-widget.loading .weather-temp,
+    .weather-widget.loading .weather-meta,
+    .weather-widget.loading .weather-sep {
+      background: linear-gradient(90deg, var(--border) 25%, var(--accent-lt) 50%, var(--border) 75%);
+      background-size: 200% 100%; animation: shimmer 1.4s infinite;
+      border-radius: 4px; color: transparent;
+    }
+    .weather-widget.loading .weather-temp { width: 32px; height: 12px; }
+    .weather-widget.loading .weather-sep  { width: 6px;  height: 12px; }
+    .weather-widget.loading .weather-meta { width: 64px; height: 12px; }
+    .weather-widget.loading .weather-icon-wrap { opacity: .25; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .weather-widget.error .weather-sep  { display: none; }
+    .weather-widget.error .weather-meta { display: none; }
+    .weather-widget.error .weather-temp { font-size: 11px; color: var(--muted); font-weight: 500; }
+
+    /* ── Toast ── */
     #toast {
       position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
       background: var(--text); color: #fff; padding: 12px 22px; border-radius: 10px;
@@ -340,100 +537,12 @@
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    .weather-widget {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: #ffffff;
-      border: 1.5px solid var(--wx-border, var(--border));
-      border-radius: 99px;
-      padding: 5px 12px 5px 7px;
-      box-shadow: 0 2px 8px var(--wx-shadow, rgba(0,0,0,.06));
-      flex-shrink: 0;
-      white-space: nowrap;
-      transition: border-color .4s, box-shadow .2s;
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .auth-page { flex-direction: column; }
+      .left { width: 100%; min-height: 280px; padding: 32px 28px; flex-shrink: unset; }
+      .right { width: 100%; min-height: unset; padding: 40px 20px; }
     }
-    .weather-widget:hover { box-shadow: 0 3px 14px var(--wx-shadow, rgba(0,0,0,.10)); }
-
-    .weather-widget.wx-sunny  { --wx-border:#fcd34d; --wx-shadow:rgba(251,191,36,.22); }
-    .weather-widget.wx-cloudy { --wx-border:#cbd5e1; --wx-shadow:rgba(100,116,139,.15); }
-    .weather-widget.wx-rain   { --wx-border:#93c5fd; --wx-shadow:rgba(59,130,246,.18); }
-    .weather-widget.wx-storm  { --wx-border:#a78bfa; --wx-shadow:rgba(109,40,217,.18); }
-    .weather-widget.wx-snow   { --wx-border:#7dd3fc; --wx-shadow:rgba(14,165,233,.16); }
-    .weather-widget.wx-haze   { --wx-border:#fde68a; --wx-shadow:rgba(234,179,8,.16); }
-    .weather-widget.wx-night  { --wx-border:#334155; --wx-shadow:rgba(0,0,0,.22); }
-
-    .weather-icon-wrap {
-      width: 20px; height: 20px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .weather-icon-wrap img {
-      width: 24px; height: 24px;
-      object-fit: contain;
-      margin: -2px;
-    }
-    .weather-info {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .weather-temp {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text);
-      line-height: 1;
-    }
-    .weather-sep {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1;
-    }
-    .weather-meta {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--label);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 130px;
-      line-height: 1;
-    }
-    .weather-widget.loading .weather-temp,
-    .weather-widget.loading .weather-meta,
-    .weather-widget.loading .weather-sep {
-      background: linear-gradient(90deg, var(--border) 25%, var(--accent-lt) 50%, var(--border) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.4s infinite;
-      border-radius: 4px;
-      color: transparent;
-    }
-    .weather-widget.loading .weather-temp { width: 32px; height: 12px; }
-    .weather-widget.loading .weather-sep  { width: 6px;  height: 12px; }
-    .weather-widget.loading .weather-meta { width: 64px; height: 12px; }
-    .weather-widget.loading .weather-icon-wrap { opacity: .25; }
-    @keyframes shimmer {
-      0%   { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-    .weather-widget.error .weather-sep  { display: none; }
-    .weather-widget.error .weather-meta { display: none; }
-    .weather-widget.error .weather-temp { font-size: 11px; color: var(--muted); font-weight: 500; }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex: 1;
-    }
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-
     @media (max-width: 700px) {
       .nav-tabs button { font-size: 11px; padding: 8px 3px; }
       .weather-meta { max-width: 72px; }
@@ -446,569 +555,509 @@
       .weather-meta { display: none; }
       .weather-sep  { display: none; }
     }
+    @media (max-width: 480px) {
+      .left { min-height: 220px; padding: 24px 20px; }
+      .left-text h2 { font-size: 15px; }
+      .left-text p  { font-size: 14px; }
+      .auth-card { padding: 32px 20px 28px; border-radius: 12px; }
+      .auth-card h1 { font-size: 26px; }
+    }
   </style>
 </head>
 <body>
 
-  <div class="page-header">
-    <div class="header-left">
-      <div>
-        <h1>Disaster Management System</h1>
-        <p>Respond faster. Manage smarter. Save lives.</p>
+  <!-- ══════════════════════════════════════════════════════
+       SIGNUP PAGE
+  ══════════════════════════════════════════════════════ -->
+  <div id="signup-page" class="auth-page">
+    <div class="left">
+      <canvas id="binaryCanvas"></canvas>
+      <img class="hands-img"
+        src="https://i.pinimg.com/736x/41/95/3c/41953cacd3105ce69cf1e22c62b11fe1.jpg"
+        alt="Helping hands" onerror="this.style.display='none'" />
+      <div class="left-overlay"></div>
+      <div class="left-text">
+        <h2>Disaster Management System (DMS)</h2>
+        <p>Stay safe. Stay connected.</p>
       </div>
     </div>
-    <div class="header-right">
-      <div class="weather-widget loading" id="weather-widget" title="Current local weather">
-        <div class="weather-icon-wrap">
-          <img id="weather-icon" src="" alt="weather" />
+    <div class="right">
+      <div class="auth-card">
+        <h1>Create an account</h1>
+        <p class="auth-subtitle">Connect to real-time disaster alerts and emergency support services.</p>
+        <div class="auth-fields">
+          <input type="text"     id="signup-name"     placeholder="Full Name" />
+          <input type="email"    id="signup-email"    placeholder="Email" />
+          <input type="tel"      id="signup-phone"    placeholder="Phone" />
+          <input type="password" id="signup-password" placeholder="Password" />
         </div>
-        <div class="weather-info">
-          <span class="weather-temp" id="weather-temp">—°C</span>
-          <span class="weather-sep">·</span>
-          <span class="weather-meta" id="weather-meta">Fetching…</span>
-        </div>
+        <p class="auth-error" id="signup-error">Please fill in all fields.</p>
+        <button class="btn-auth" onclick="doSignup()">Create account</button>
+        <p class="auth-switch">Already have an account? <a onclick="showLogin()">Login</a></p>
       </div>
-      <div class="header-badge">2 Active Alerts</div>
-    </div>
-  </div>
-
-  <div class="nav-wrap">
-    <div class="nav-tabs">
-      <button class="active" onclick="show('home')">Home</button>
-      <button onclick="show('awareness')">Awareness</button>
-      <button onclick="show('disasterinfo')">Disaster Info</button>
-      <button onclick="show('camp')">Relief Camps</button>
-      <button onclick="show('service')">Service</button>
-      <button onclick="show('donate')">Donate</button>
-      <button onclick="show('contact')">Contact</button>
-      <button onclick="show('complaint')">Complaint</button>
     </div>
   </div>
 
-  <div class="card">
+  <!-- ══════════════════════════════════════════════════════
+       LOGIN PAGE
+  ══════════════════════════════════════════════════════ -->
+  <div id="login-page" class="auth-page active">
+    <div class="left">
+      <canvas id="binaryCanvas2"></canvas>
+      <img class="hands-img"
+        src="https://i.pinimg.com/736x/41/95/3c/41953cacd3105ce69cf1e22c62b11fe1.jpg"
+        alt="Helping hands" onerror="this.style.display='none'" />
+      <div class="left-overlay"></div>
+      <div class="left-text">
+        <h2>Disaster Management System (DMS)</h2>
+        <p>Stay safe. Stay connected.</p>
+      </div>
+    </div>
+    <div class="right">
+      <div class="auth-card">
+        <h1>Welcome back</h1>
+        <p class="auth-subtitle">Sign in to access disaster alerts and emergency services.</p>
+        <div class="auth-fields">
+          <input type="email"    id="login-email"    placeholder="Email" />
+          <input type="password" id="login-password" placeholder="Password" />
+        </div>
+        <p class="auth-error" id="login-error">Invalid email or password.</p>
+        <button class="btn-auth" onclick="doLogin()">Sign in</button>
+        <p class="auth-switch">Don't have an account? <a onclick="showSignup()">Create one</a></p>
+      </div>
+    </div>
+  </div>
 
-    <div id="home" class="section-block active">
-      <div class="section-inner">
-        <div class="section-title">Live Disaster Alerts</div>
-        <div class="alert-banner danger">
-          <div class="alert-dot"></div>
-          <div>
-            <strong>Flood Warning — Coastal Areas</strong>
-            <p>Residents in low-lying zones are advised to evacuate immediately. Emergency shelters are active at Sector 4 and Hillside.</p>
-          </div>
-        </div>
-        <div class="alert-banner warning">
-          <div class="alert-dot"></div>
-          <div>
-            <strong>High Wind Advisory</strong>
-            <p>Gusts up to 90 km/h expected overnight. Secure loose outdoor items and avoid open areas.</p>
-          </div>
-        </div>
-        <div class="alert-banner info">
-          <div class="alert-dot"></div>
-          <div>
-            <strong>Heavy Rainfall Notice</strong>
-            <p>IMD has issued a yellow alert for the district. River water levels being monitored closely.</p>
-          </div>
+  <!-- ══════════════════════════════════════════════════════
+       MAIN APP
+  ══════════════════════════════════════════════════════ -->
+  <div id="main-app">
+
+    <div class="page-header">
+      <div class="header-left">
+        <div>
+          <h1>Disaster Management System</h1>
+          <p>Respond faster. Manage smarter. Save lives.</p>
         </div>
       </div>
-
-      <div class="section-inner">
-        <div class="section-title">Notification Preferences</div>
-        <div class="toggle-row">
-          <div class="toggle-row-info">
-            <span>Push notifications for alerts</span>
-            <small>Get real-time disaster warnings</small>
+      <div class="header-right">
+        <div class="weather-widget loading" id="weather-widget" title="Current local weather">
+          <div class="weather-icon-wrap">
+            <img id="weather-icon" src="" alt="weather" />
           </div>
-          <label class="toggle"><input type="checkbox" checked /><div class="toggle-track"></div></label>
-        </div>
-        <div class="toggle-row">
-          <div class="toggle-row-info">
-            <span>SMS alerts to registered number</span>
-            <small>Text messages during emergencies</small>
+          <div class="weather-info">
+            <span class="weather-temp" id="weather-temp">—°C</span>
+            <span class="weather-sep">·</span>
+            <span class="weather-meta" id="weather-meta">Fetching…</span>
           </div>
-          <label class="toggle"><input type="checkbox" /><div class="toggle-track"></div></label>
         </div>
-        <div class="toggle-row">
-          <div class="toggle-row-info">
-            <span>Email digest (daily summary)</span>
-            <small>Morning briefing on active situations</small>
-          </div>
-          <label class="toggle"><input type="checkbox" checked /><div class="toggle-track"></div></label>
+        <div class="user-badge" id="user-badge">
+          <div class="user-avatar" id="user-avatar">U</div>
+          <span id="user-name-display">User</span>
         </div>
+        <div class="header-badge">2 Active Alerts</div>
+        <button class="btn-logout" onclick="doLogout()">Logout</button>
       </div>
     </div>
 
-    <div id="awareness" class="section-block">
-      <div class="section-inner">
-        <div class="section-title">Disaster Preparedness</div>
-        <div class="section-heading">Stay Informed. Stay Safe.</div>
-        <div class="section-sub">Knowledge before a disaster strikes can save lives.</div>
-        <div class="tip-grid">
-          <div class="tip-card">
-            <div class="tip-title">Emergency Kit</div>
-            <div class="tip-desc">Prepare a bag with water, food (3-day supply), first aid, flashlight, medicines, and copies of documents.</div>
-          </div>
-          <div class="tip-card">
-            <div class="tip-title">Evacuation Plan</div>
-            <div class="tip-desc">Know at least two evacuation routes from your home and identify a family meeting point outside your area.</div>
-          </div>
-          <div class="tip-card">
-            <div class="tip-title">Stay Connected</div>
-            <div class="tip-desc">Keep a battery-powered or hand-crank radio for official emergency broadcasts when power is out.</div>
-          </div>
-          <div class="tip-card">
-            <div class="tip-title">Secure Your Home</div>
-            <div class="tip-desc">Identify and fix structural vulnerabilities. Know how to shut off electricity, gas, and water quickly.</div>
-          </div>
-          <div class="tip-card">
-            <div class="tip-title">Family Communication</div>
-            <div class="tip-desc">Designate an out-of-area contact everyone can reach. Share emergency contacts with all family members.</div>
-          </div>
-          <div class="tip-card">
-            <div class="tip-title">Medical Readiness</div>
-            <div class="tip-desc">Store at least a 7-day supply of prescription medications. Know your nearest medical facility's location.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-inner">
-        <div class="section-title">Flood — Do's &amp; Don'ts</div>
-        <div class="dos-donts">
-          <div class="list-col dos-col">
-            <h4>Do's</h4>
-            <ul>
-              <li>Move to higher ground immediately</li>
-              <li>Disconnect all electrical appliances</li>
-              <li>Keep emergency kit ready</li>
-              <li>Follow official evacuation orders</li>
-              <li>Help elderly and disabled neighbours</li>
-            </ul>
-          </div>
-          <div class="list-col dont-col">
-            <h4>Don'ts</h4>
-            <ul>
-              <li>Walk through moving floodwater</li>
-              <li>Drive through flooded roads</li>
-              <li>Touch electrical equipment if wet</li>
-              <li>Return home before it's declared safe</li>
-              <li>Ignore official warnings or alerts</li>
-            </ul>
-          </div>
-        </div>
+    <div class="nav-wrap">
+      <div class="nav-tabs">
+        <button class="active" onclick="show('home')">Home</button>
+        <button onclick="show('awareness')">Awareness</button>
+        <button onclick="show('disasterinfo')">Disaster Info</button>
+        <button onclick="show('camp')">Relief Camps</button>
+        <button onclick="show('service')">Service</button>
+        <button onclick="show('donate')">Donate</button>
+        <button onclick="show('contact')">Contact</button>
+        <button onclick="show('complaint')">Complaint</button>
       </div>
     </div>
 
-    <div id="disasterinfo" class="section-block">
-      <div class="section-inner">
-        <div class="section-title">Current Situation Overview</div>
-        <div class="stat-grid">
-          <div class="stat-card red-card">
-            <div class="stat-val">3</div>
-            <div class="stat-label">Active Disasters</div>
+    <div class="card">
+
+      <!-- HOME -->
+      <div id="home" class="section-block active">
+        <div class="section-inner">
+          <div class="section-title">Live Disaster Alerts</div>
+          <div class="alert-banner danger">
+            <div class="alert-dot"></div>
+            <div>
+              <strong>Flood Warning — Coastal Areas</strong>
+              <p>Residents in low-lying zones are advised to evacuate immediately. Emergency shelters are active at Sector 4 and Hillside.</p>
+            </div>
           </div>
-          <div class="stat-card amber-card">
-            <div class="stat-val">10,000</div>
-            <div class="stat-label">People Affected</div>
+          <div class="alert-banner warning">
+            <div class="alert-dot"></div>
+            <div>
+              <strong>High Wind Advisory</strong>
+              <p>Gusts up to 90 km/h expected overnight. Secure loose outdoor items and avoid open areas.</p>
+            </div>
           </div>
-          <div class="stat-card green-card">
-            <div class="stat-val">8,200</div>
-            <div class="stat-label">Evacuated Safely</div>
+          <div class="alert-banner info">
+            <div class="alert-dot"></div>
+            <div>
+              <strong>Heavy Rainfall Notice</strong>
+              <p>IMD has issued a yellow alert for the district. River water levels being monitored closely.</p>
+            </div>
           </div>
         </div>
-        <div class="item-list">
-          <div class="item-card">
-            <div class="ic-left">
-              <div class="ic-name">Coastal Flood — Zones 3, 5, 7</div>
-              <div class="ic-meta">Started: Apr 15, 2026 · Severity: High · IMD Orange Alert</div>
+        <div class="section-inner">
+          <div class="section-title">Notification Preferences</div>
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <span>Push notifications for alerts</span>
+              <small>Get real-time disaster warnings</small>
             </div>
-            <span class="badge warn">Ongoing</span>
+            <label class="toggle"><input type="checkbox" checked /><div class="toggle-track"></div></label>
           </div>
-          <div class="item-card">
-            <div class="ic-left">
-              <div class="ic-name">Cyclone Watch — Northern Belt</div>
-              <div class="ic-meta">Forecast: Apr 18–20 · Category 2 · Landfall risk: 60%</div>
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <span>SMS alerts to registered number</span>
+              <small>Text messages during emergencies</small>
             </div>
-            <span class="badge warn">Watch</span>
+            <label class="toggle"><input type="checkbox" /><div class="toggle-track"></div></label>
           </div>
-          <div class="item-card">
-            <div class="ic-left">
-              <div class="ic-name">Forest Fire — Eastern Hills</div>
-              <div class="ic-meta">Contained: 70% · Fire brigades deployed · Air support active</div>
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <span>Email digest (daily summary)</span>
+              <small>Morning briefing on active situations</small>
             </div>
-            <span class="badge active">Controlled</span>
+            <label class="toggle"><input type="checkbox" checked /><div class="toggle-track"></div></label>
           </div>
         </div>
       </div>
 
-      <div class="section-inner">
-        <div class="section-title">Disaster Type Reference</div>
-        <div class="tip-grid">
-          <div class="tip-card">
-            <div class="tip-title">Floods</div>
-            <div class="tip-desc">Overflow of water submerging land. Caused by heavy rain, cyclones, or dam failures. Can occur rapidly (flash floods).</div>
-          </div>
-          <div class="tip-card">
-            <div class="tip-title">Cyclones</div>
-            <div class="tip-desc">Rotating storms with high winds and heavy rain. Rated by category (1–5). Cause storm surges and coastal flooding.</div>
-          </div>
-          <div class="tip-card">
-            <div class="tip-title">Earthquakes</div>
-            <div class="tip-desc">Ground shaking caused by tectonic plate movement. Measured on the Richter scale. Can trigger tsunamis and landslides.</div>
-          </div>
-          <div class="tip-card">
-            <div class="tip-title">Wildfires</div>
-            <div class="tip-desc">Uncontrolled fires in vegetation. Fueled by drought, heat, and wind. Can spread rapidly and cause significant air pollution.</div>
+      <!-- AWARENESS -->
+      <div id="awareness" class="section-block">
+        <div class="section-inner">
+          <div class="section-title">Disaster Preparedness</div>
+          <div class="section-heading">Stay Informed. Stay Safe.</div>
+          <div class="section-sub">Knowledge before a disaster strikes can save lives.</div>
+          <div class="tip-grid">
+            <div class="tip-card"><div class="tip-title">Emergency Kit</div><div class="tip-desc">Prepare a bag with water, food (3-day supply), first aid, flashlight, medicines, and copies of documents.</div></div>
+            <div class="tip-card"><div class="tip-title">Evacuation Plan</div><div class="tip-desc">Know at least two evacuation routes from your home and identify a family meeting point outside your area.</div></div>
+            <div class="tip-card"><div class="tip-title">Stay Connected</div><div class="tip-desc">Keep a battery-powered or hand-crank radio for official emergency broadcasts when power is out.</div></div>
+            <div class="tip-card"><div class="tip-title">Secure Your Home</div><div class="tip-desc">Identify and fix structural vulnerabilities. Know how to shut off electricity, gas, and water quickly.</div></div>
+            <div class="tip-card"><div class="tip-title">Family Communication</div><div class="tip-desc">Designate an out-of-area contact everyone can reach. Share emergency contacts with all family members.</div></div>
+            <div class="tip-card"><div class="tip-title">Medical Readiness</div><div class="tip-desc">Store at least a 7-day supply of prescription medications. Know your nearest medical facility's location.</div></div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div id="camp" class="section-block">
-      <div class="section-inner">
-        <div class="section-title">Relief Camps</div>
-        <div class="item-list">
-          <div class="item-card">
-            <div class="ic-left">
-              <div class="ic-name">Camp Alpha — Sector 4</div>
-              <div class="ic-meta">Capacity: 120 · Open 24/7 · Food &amp; water provided</div>
+        <div class="section-inner">
+          <div class="section-title">Flood — Do's &amp; Don'ts</div>
+          <div class="dos-donts">
+            <div class="list-col dos-col">
+              <h4>Do's</h4>
+              <ul>
+                <li>Move to higher ground immediately</li>
+                <li>Disconnect all electrical appliances</li>
+                <li>Keep emergency kit ready</li>
+                <li>Follow official evacuation orders</li>
+                <li>Help elderly and disabled neighbours</li>
+              </ul>
             </div>
-            <span class="badge ok">Available</span>
-          </div>
-          <div class="item-card">
-            <div class="ic-left">
-              <div class="ic-name">Camp Bravo — Hillside</div>
-              <div class="ic-meta">Capacity: 80 · Medical unit on-site · Accepts pets</div>
+            <div class="list-col dont-col">
+              <h4>Don'ts</h4>
+              <ul>
+                <li>Walk through moving floodwater</li>
+                <li>Drive through flooded roads</li>
+                <li>Touch electrical equipment if wet</li>
+                <li>Return home before it's declared safe</li>
+                <li>Ignore official warnings or alerts</li>
+              </ul>
             </div>
-            <span class="badge ok">Available</span>
-          </div>
-          <div class="item-card">
-            <div class="ic-left">
-              <div class="ic-name">Camp Charlie — Riverside</div>
-              <div class="ic-meta">Capacity: 200 · Full as of Apr 16 · Contact for overflow</div>
-            </div>
-            <span class="badge full">Full</span>
-          </div>
-          <div class="item-card">
-            <div class="ic-left">
-              <div class="ic-name">Camp Delta — Community Hall</div>
-              <div class="ic-meta">Capacity: 150 · Just opened · Blankets &amp; meals available</div>
-            </div>
-            <span class="badge ok">Available</span>
           </div>
         </div>
       </div>
 
-      <div class="section-inner">
-        <div class="section-title">Request Camp Admission</div>
-        <div class="field-row">
-          <div class="field-group">
-            <label>Full Name</label>
-            <input type="text" id="camp-name" placeholder="e.g. Hari" />
+      <!-- DISASTER INFO -->
+      <div id="disasterinfo" class="section-block">
+        <div class="section-inner">
+          <div class="section-title">Current Situation Overview</div>
+          <div class="stat-grid">
+            <div class="stat-card red-card"><div class="stat-val">3</div><div class="stat-label">Active Disasters</div></div>
+            <div class="stat-card amber-card"><div class="stat-val">10,000</div><div class="stat-label">People Affected</div></div>
+            <div class="stat-card green-card"><div class="stat-val">8,200</div><div class="stat-label">Evacuated Safely</div></div>
           </div>
-          <div class="field-group">
-            <label>Number of People</label>
-            <input type="number" id="camp-people" placeholder="e.g. 4" min="1" max="100" />
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field-group">
-            <label>Preferred Camp</label>
-            <div class="select-wrap">
-              <select id="camp-pref">
-                <option>Camp Alpha — Sector 4</option>
-                <option>Camp Bravo — Hillside</option>
-                <option>Camp Delta — Community Hall</option>
-              </select>
+          <div class="item-list">
+            <div class="item-card">
+              <div class="ic-left"><div class="ic-name">Coastal Flood — Zones 3, 5, 7</div><div class="ic-meta">Started: Apr 15, 2026 · Severity: High · IMD Orange Alert</div></div>
+              <span class="badge warn">Ongoing</span>
             </div>
-          </div>
-          <div class="field-group">
-            <label>Special Needs</label>
-            <div class="select-wrap">
-              <select id="camp-needs">
-                <option>None</option>
-                <option>Medical Assistance</option>
-                <option>Infant / Baby Care</option>
-                <option>Elderly Support</option>
-                <option>Disability Assistance</option>
-              </select>
+            <div class="item-card">
+              <div class="ic-left"><div class="ic-name">Cyclone Watch — Northern Belt</div><div class="ic-meta">Forecast: Apr 18–20 · Category 2 · Landfall risk: 60%</div></div>
+              <span class="badge warn">Watch</span>
+            </div>
+            <div class="item-card">
+              <div class="ic-left"><div class="ic-name">Forest Fire — Eastern Hills</div><div class="ic-meta">Contained: 70% · Fire brigades deployed · Air support active</div></div>
+              <span class="badge active">Controlled</span>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div id="service" class="section-block">
-      <div class="section-inner">
-        <div class="section-title">Emergency Helplines</div>
-        <div class="helpline-grid">
-          <div class="helpline-card">
-            <div class="helpline-name">Fire &amp; Rescue</div>
-            <div class="helpline-num">101</div>
-          </div>
-          <div class="helpline-card">
-            <div class="helpline-name">Medical Emergency</div>
-            <div class="helpline-num">108</div>
-          </div>
-          <div class="helpline-card">
-            <div class="helpline-name">Police</div>
-            <div class="helpline-num">100</div>
-          </div>
-          <div class="helpline-card">
-            <div class="helpline-name">Flood Control Room</div>
-            <div class="helpline-num">1077</div>
-          </div>
-          <div class="helpline-card">
-            <div class="helpline-name">District DM Cell</div>
-            <div class="helpline-num">0495-2371002</div>
-          </div>
-          <div class="helpline-card">
-            <div class="helpline-name">NDRF Helpline</div>
-            <div class="helpline-num">011-23438017</div>
+        <div class="section-inner">
+          <div class="section-title">Disaster Type Reference</div>
+          <div class="tip-grid">
+            <div class="tip-card"><div class="tip-title">Floods</div><div class="tip-desc">Overflow of water submerging land. Caused by heavy rain, cyclones, or dam failures. Can occur rapidly (flash floods).</div></div>
+            <div class="tip-card"><div class="tip-title">Cyclones</div><div class="tip-desc">Rotating storms with high winds and heavy rain. Rated by category (1–5). Cause storm surges and coastal flooding.</div></div>
+            <div class="tip-card"><div class="tip-title">Earthquakes</div><div class="tip-desc">Ground shaking caused by tectonic plate movement. Measured on the Richter scale. Can trigger tsunamis and landslides.</div></div>
+            <div class="tip-card"><div class="tip-title">Wildfires</div><div class="tip-desc">Uncontrolled fires in vegetation. Fueled by drought, heat, and wind. Can spread rapidly and cause significant air pollution.</div></div>
           </div>
         </div>
       </div>
 
-      <div class="section-inner">
-        <div class="section-title">Active Services</div>
-        <div class="item-list">
-          <div class="item-card">
-            <div class="ic-left">
-              <div class="ic-name">Air Rescue Operations</div>
-              <div class="ic-meta">2 helicopters deployed · Coastal Zones 3 &amp; 5 · 6:00 AM – 7:00 PM</div>
-            </div>
-            <span class="badge active">Active</span>
-          </div>
-          <div class="item-card">
-            <div class="ic-left">
-              <div class="ic-name">Boat Rescue Teams</div>
-              <div class="ic-meta">14 boats operational · Sector 3, 7, 9 · NDRF + State Force</div>
-            </div>
-            <span class="badge active">Active</span>
-          </div>
-          <div class="item-card">
-            <div class="ic-left">
-              <div class="ic-name">Mobile Medical Units</div>
-              <div class="ic-meta">6 units deployed · Free consultation &amp; medicines</div>
-            </div>
-            <span class="badge active">Active</span>
-          </div>
-          <div class="item-card">
-            <div class="ic-left">
-              <div class="ic-name">Food Distribution Points</div>
-              <div class="ic-meta">Twice daily · School Grounds, Ward Office, Panchayat Hall</div>
-            </div>
-            <span class="badge ok">Running</span>
+      <!-- CAMP -->
+      <div id="camp" class="section-block">
+        <div class="section-inner">
+          <div class="section-title">Relief Camps</div>
+          <div class="item-list">
+            <div class="item-card"><div class="ic-left"><div class="ic-name">Camp Alpha — Sector 4</div><div class="ic-meta">Capacity: 120 · Open 24/7 · Food &amp; water provided</div></div><span class="badge ok">Available</span></div>
+            <div class="item-card"><div class="ic-left"><div class="ic-name">Camp Bravo — Hillside</div><div class="ic-meta">Capacity: 80 · Medical unit on-site · Accepts pets</div></div><span class="badge ok">Available</span></div>
+            <div class="item-card"><div class="ic-left"><div class="ic-name">Camp Charlie — Riverside</div><div class="ic-meta">Capacity: 200 · Full as of Apr 16 · Contact for overflow</div></div><span class="badge full">Full</span></div>
+            <div class="item-card"><div class="ic-left"><div class="ic-name">Camp Delta — Community Hall</div><div class="ic-meta">Capacity: 150 · Just opened · Blankets &amp; meals available</div></div><span class="badge ok">Available</span></div>
           </div>
         </div>
-      </div>
-
-      <div class="section-inner">
-        <div class="section-title">Volunteer Registration</div>
-        <div class="volunteer-box">
-          <div class="vb-title">Want to help? Register as a volunteer</div>
-          <div class="field-row" style="margin-bottom:12px">
-            <div class="field-group">
-              <label>Full Name</label>
-              <input type="text" id="vol-name" placeholder="e.g. Hari" />
-            </div>
-            <div class="field-group">
-              <label>Phone Number</label>
-              <input type="tel" id="vol-phone" placeholder="e.g. 9100001000" />
-            </div>
+        <div class="section-inner">
+          <div class="section-title">Request Camp Admission</div>
+          <div class="field-row">
+            <div class="field-group"><label>Full Name</label><input type="text" id="camp-name" placeholder="e.g. Hari" /></div>
+            <div class="field-group"><label>Number of People</label><input type="number" id="camp-people" placeholder="e.g. 4" min="1" max="100" /></div>
           </div>
           <div class="field-row">
-            <div class="field-group">
-              <label>Skill / Role</label>
-              <div class="select-wrap">
-                <select id="vol-skill">
-                  <option>First Aid / Medical</option>
-                  <option>Rescue Operations</option>
-                  <option>Food Distribution</option>
-                  <option>Transportation / Driving</option>
-                  <option>Communication / Coordination</option>
-                  <option>General Support</option>
-                </select>
-              </div>
-            </div>
-            <div class="field-group">
-              <label>Availability</label>
-              <div class="select-wrap">
-                <select id="vol-avail">
-                  <option>Full-time (all days)</option>
-                  <option>Weekdays only</option>
-                  <option>Weekends only</option>
-                  <option>Evenings only</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="donate" class="section-block">
-      <div class="section-inner">
-        <div class="section-title">Donation Details</div>
-        <div class="field-row">
-          <div class="field-group">
-            <label>Your Name</label>
-            <input type="text" id="donor-name" placeholder="e.g. Hari" />
-          </div>
-          <div class="field-group">
-            <label>Email</label>
-            <input type="email" id="donor-email" placeholder="you@example.com" />
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field-group">
-            <label>Amount</label>
-            <div class="input-prefix">
-              <span>₹</span>
-              <input type="number" id="donor-amount" placeholder="500" />
-            </div>
-          </div>
-          <div class="field-group">
-            <label>Donation Type</label>
-            <div class="select-wrap">
-              <select id="donor-type">
-                <option>Monetary</option>
-                <option>Food Supplies</option>
-                <option>Clothing</option>
-                <option>Medical Supplies</option>
-                <option>Other</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="field-group">
-          <label>Message (optional)</label>
-          <textarea id="donor-msg" placeholder="A note of support for affected families…"></textarea>
-        </div>
-      </div>
-    </div>
-
-    <div id="contact" class="section-block">
-      <div class="section-inner">
-        <div class="section-title">Contact Information</div>
-        <div class="contact-grid">
-          <div class="contact-info-card">
-            <div class="ci-label">District Control Room</div>
-            <div class="ci-value">Collectorate, Civil Station P.O, Kozhikode</div>
-          </div>
-          <div class="contact-info-card">
-            <div class="ci-label">Helpline Number</div>
-            <div class="ci-value">1077 / 0495-2371400</div>
-          </div>
-          <div class="contact-info-card">
-            <div class="ci-label">Email</div>
-            <div class="ci-value">dmcellkozhikode@gmail.com</div>
-          </div>
-          <div class="contact-info-card">
-            <div class="ci-label">Working Hours</div>
-            <div class="ci-value">24/7 during active disaster alerts</div>
+            <div class="field-group"><label>Preferred Camp</label><div class="select-wrap"><select id="camp-pref"><option>Camp Alpha — Sector 4</option><option>Camp Bravo — Hillside</option><option>Camp Delta — Community Hall</option></select></div></div>
+            <div class="field-group"><label>Special Needs</label><div class="select-wrap"><select id="camp-needs"><option>None</option><option>Medical Assistance</option><option>Infant / Baby Care</option><option>Elderly Support</option><option>Disability Assistance</option></select></div></div>
           </div>
         </div>
       </div>
 
-      <div class="section-inner">
-        <div class="section-title">Send a Message</div>
-        <div class="field-row">
-          <div class="field-group">
-            <label>Your Name</label>
-            <input type="text" id="contact-name" placeholder="e.g. Hari" />
-          </div>
-          <div class="field-group">
-            <label>Phone / Email</label>
-            <input type="text" id="contact-phone" placeholder="Phone or email" />
-          </div>
-        </div>
-        <div class="field-group" style="margin-bottom:14px">
-          <label>Subject</label>
-          <div class="select-wrap">
-            <select id="contact-subject">
-              <option>General Inquiry</option>
-              <option>Request for Information</option>
-              <option>Media / Press</option>
-              <option>Feedback</option>
-              <option>Partnership / NGO</option>
-              <option>Other</option>
-            </select>
+      <!-- SERVICE -->
+      <div id="service" class="section-block">
+        <div class="section-inner">
+          <div class="section-title">Emergency Helplines</div>
+          <div class="helpline-grid">
+            <div class="helpline-card"><div class="helpline-name">Fire &amp; Rescue</div><div class="helpline-num">101</div></div>
+            <div class="helpline-card"><div class="helpline-name">Medical Emergency</div><div class="helpline-num">108</div></div>
+            <div class="helpline-card"><div class="helpline-name">Police</div><div class="helpline-num">100</div></div>
+            <div class="helpline-card"><div class="helpline-name">Flood Control Room</div><div class="helpline-num">1077</div></div>
+            <div class="helpline-card"><div class="helpline-name">District DM Cell</div><div class="helpline-num">0495-2371002</div></div>
+            <div class="helpline-card"><div class="helpline-name">NDRF Helpline</div><div class="helpline-num">011-23438017</div></div>
           </div>
         </div>
-        <div class="field-group">
-          <label>Message</label>
-          <textarea id="contact-msg" placeholder="Type your message here…"></textarea>
-        </div>
-      </div>
-    </div>
-
-    <div id="complaint" class="section-block">
-      <div class="section-inner">
-        <div class="section-title">Raise a Complaint</div>
-        <div class="field-row">
-          <div class="field-group">
-            <label>Your Name</label>
-            <input type="text" id="comp-name" placeholder="e.g. Hari" />
-          </div>
-          <div class="field-group">
-            <label>Phone Number</label>
-            <input type="tel" id="comp-phone" placeholder="e.g. 9800001000" />
+        <div class="section-inner">
+          <div class="section-title">Active Services</div>
+          <div class="item-list">
+            <div class="item-card"><div class="ic-left"><div class="ic-name">Air Rescue Operations</div><div class="ic-meta">2 helicopters deployed · Coastal Zones 3 &amp; 5 · 6:00 AM – 7:00 PM</div></div><span class="badge active">Active</span></div>
+            <div class="item-card"><div class="ic-left"><div class="ic-name">Boat Rescue Teams</div><div class="ic-meta">14 boats operational · Sector 3, 7, 9 · NDRF + State Force</div></div><span class="badge active">Active</span></div>
+            <div class="item-card"><div class="ic-left"><div class="ic-name">Mobile Medical Units</div><div class="ic-meta">6 units deployed · Free consultation &amp; medicines</div></div><span class="badge active">Active</span></div>
+            <div class="item-card"><div class="ic-left"><div class="ic-name">Food Distribution Points</div><div class="ic-meta">Twice daily · School Grounds, Ward Office, Panchayat Hall</div></div><span class="badge ok">Running</span></div>
           </div>
         </div>
-        <div class="field-row">
-          <div class="field-group">
-            <label>Category</label>
-            <div class="select-wrap">
-              <select id="comp-type">
-                <option>Supply Shortage</option>
-                <option>Infrastructure Damage</option>
-                <option>Medical Emergency</option>
-                <option>Relief Camp Issue</option>
-                <option>Rescue Delay</option>
-                <option>Other</option>
-              </select>
+        <div class="section-inner">
+          <div class="section-title">Volunteer Registration</div>
+          <div class="volunteer-box">
+            <div class="vb-title">Want to help? Register as a volunteer</div>
+            <div class="field-row" style="margin-bottom:12px">
+              <div class="field-group"><label>Full Name</label><input type="text" id="vol-name" placeholder="e.g. Hari" /></div>
+              <div class="field-group"><label>Phone Number</label><input type="tel" id="vol-phone" placeholder="e.g. 9100001000" /></div>
             </div>
-          </div>
-          <div class="field-group">
-            <label>Urgency</label>
-            <div class="select-wrap">
-              <select id="comp-urgency">
-                <option>High — Immediate attention needed</option>
-                <option>Medium — Within a few hours</option>
-                <option>Low — General feedback</option>
-              </select>
+            <div class="field-row">
+              <div class="field-group"><label>Skill / Role</label><div class="select-wrap"><select id="vol-skill"><option>First Aid / Medical</option><option>Rescue Operations</option><option>Food Distribution</option><option>Transportation / Driving</option><option>Communication / Coordination</option><option>General Support</option></select></div></div>
+              <div class="field-group"><label>Availability</label><div class="select-wrap"><select id="vol-avail"><option>Full-time (all days)</option><option>Weekdays only</option><option>Weekends only</option><option>Evenings only</option></select></div></div>
             </div>
           </div>
         </div>
-        <div class="field-group">
-          <label>Description</label>
-          <textarea id="comp-msg" placeholder="Describe the issue in as much detail as possible…"></textarea>
+      </div>
+
+      <!-- DONATE -->
+      <div id="donate" class="section-block">
+        <div class="section-inner">
+          <div class="section-title">Donation Details</div>
+          <div class="field-row">
+            <div class="field-group"><label>Your Name</label><input type="text" id="donor-name" placeholder="e.g. Hari" /></div>
+            <div class="field-group"><label>Email</label><input type="email" id="donor-email" placeholder="you@example.com" /></div>
+          </div>
+          <div class="field-row">
+            <div class="field-group"><label>Amount</label><div class="input-prefix"><span>₹</span><input type="number" id="donor-amount" placeholder="500" /></div></div>
+            <div class="field-group"><label>Donation Type</label><div class="select-wrap"><select id="donor-type"><option>Monetary</option><option>Food Supplies</option><option>Clothing</option><option>Medical Supplies</option><option>Other</option></select></div></div>
+          </div>
+          <div class="field-group"><label>Message (optional)</label><textarea id="donor-msg" placeholder="A note of support for affected families…"></textarea></div>
         </div>
       </div>
-    </div>
 
-    <div class="card-footer" id="footer-actions" style="display:none">
-      <button class="btn btn-ghost" onclick="resetActive()">Reset</button>
-      <button class="btn btn-primary" id="primary-btn" onclick="handlePrimary()">Submit</button>
-    </div>
+      <!-- CONTACT -->
+      <div id="contact" class="section-block">
+        <div class="section-inner">
+          <div class="section-title">Contact Information</div>
+          <div class="contact-grid">
+            <div class="contact-info-card"><div class="ci-label">District Control Room</div><div class="ci-value">Collectorate, Civil Station P.O, Kozhikode</div></div>
+            <div class="contact-info-card"><div class="ci-label">Helpline Number</div><div class="ci-value">1077 / 0495-2371400</div></div>
+            <div class="contact-info-card"><div class="ci-label">Email</div><div class="ci-value">dmcellkozhikode@gmail.com</div></div>
+            <div class="contact-info-card"><div class="ci-label">Working Hours</div><div class="ci-value">24/7 during active disaster alerts</div></div>
+          </div>
+        </div>
+        <div class="section-inner">
+          <div class="section-title">Send a Message</div>
+          <div class="field-row">
+            <div class="field-group"><label>Your Name</label><input type="text" id="contact-name" placeholder="e.g. Hari" /></div>
+            <div class="field-group"><label>Phone / Email</label><input type="text" id="contact-phone" placeholder="Phone or email" /></div>
+          </div>
+          <div class="field-group" style="margin-bottom:14px"><label>Subject</label><div class="select-wrap"><select id="contact-subject"><option>General Inquiry</option><option>Request for Information</option><option>Media / Press</option><option>Feedback</option><option>Partnership / NGO</option><option>Other</option></select></div></div>
+          <div class="field-group"><label>Message</label><textarea id="contact-msg" placeholder="Type your message here…"></textarea></div>
+        </div>
+      </div>
 
-  </div>
+      <!-- COMPLAINT -->
+      <div id="complaint" class="section-block">
+        <div class="section-inner">
+          <div class="section-title">Raise a Complaint</div>
+          <div class="field-row">
+            <div class="field-group"><label>Your Name</label><input type="text" id="comp-name" placeholder="e.g. Hari" /></div>
+            <div class="field-group"><label>Phone Number</label><input type="tel" id="comp-phone" placeholder="e.g. 9800001000" /></div>
+          </div>
+          <div class="field-row">
+            <div class="field-group"><label>Category</label><div class="select-wrap"><select id="comp-type"><option>Supply Shortage</option><option>Infrastructure Damage</option><option>Medical Emergency</option><option>Relief Camp Issue</option><option>Rescue Delay</option><option>Other</option></select></div></div>
+            <div class="field-group"><label>Urgency</label><div class="select-wrap"><select id="comp-urgency"><option>High — Immediate attention needed</option><option>Medium — Within a few hours</option><option>Low — General feedback</option></select></div></div>
+          </div>
+          <div class="field-group"><label>Description</label><textarea id="comp-msg" placeholder="Describe the issue in as much detail as possible…"></textarea></div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="card-footer" id="footer-actions" style="display:none">
+        <button class="btn btn-ghost" onclick="resetActive()">Reset</button>
+        <button class="btn btn-primary" id="primary-btn" onclick="handlePrimary()">Submit</button>
+      </div>
+
+    </div><!-- /.card -->
+  </div><!-- /#main-app -->
 
   <div id="toast"></div>
 
   <script>
+    // ════════════════════════════════════════════════════════
+    // AUTH — Simple in-memory user store
+    // (Replace with real API calls to your Azure Functions)
+    // ════════════════════════════════════════════════════════
+
+    // In-memory users (pre-seeded demo account)
+    const users = [
+      { name: 'Demo User', email: 'demo@dms.in', phone: '9000000000', password: 'demo1234' }
+    ];
+
+    let currentUser = null;
+
+    function showSignup() {
+      document.getElementById('login-page').classList.remove('active');
+      document.getElementById('signup-page').classList.add('active');
+      clearErrors();
+    }
+
+    function showLogin() {
+      document.getElementById('signup-page').classList.remove('active');
+      document.getElementById('login-page').classList.add('active');
+      clearErrors();
+    }
+
+    function clearErrors() {
+      document.getElementById('signup-error').classList.remove('show');
+      document.getElementById('login-error').classList.remove('show');
+    }
+
+    function doSignup() {
+      const name     = document.getElementById('signup-name').value.trim();
+      const email    = document.getElementById('signup-email').value.trim();
+      const phone    = document.getElementById('signup-phone').value.trim();
+      const password = document.getElementById('signup-password').value.trim();
+
+      const errEl = document.getElementById('signup-error');
+
+      if (!name || !email || !phone || !password) {
+        errEl.textContent = 'Please fill in all fields.';
+        errEl.classList.add('show'); return;
+      }
+      if (!/\S+@\S+\.\S+/.test(email)) {
+        errEl.textContent = 'Please enter a valid email address.';
+        errEl.classList.add('show'); return;
+      }
+      if (password.length < 6) {
+        errEl.textContent = 'Password must be at least 6 characters.';
+        errEl.classList.add('show'); return;
+      }
+      if (users.find(u => u.email === email)) {
+        errEl.textContent = 'An account with this email already exists.';
+        errEl.classList.add('show'); return;
+      }
+
+      // Save user
+      users.push({ name, email, phone, password });
+      currentUser = { name, email };
+      enterApp();
+    }
+
+    function doLogin() {
+      const email    = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+      const errEl    = document.getElementById('login-error');
+
+      if (!email || !password) {
+        errEl.textContent = 'Please enter your email and password.';
+        errEl.classList.add('show'); return;
+      }
+
+      const user = users.find(u => u.email === email && u.password === password);
+      if (!user) {
+        errEl.textContent = 'Invalid email or password. Try demo@dms.in / demo1234';
+        errEl.classList.add('show'); return;
+      }
+
+      currentUser = user;
+      enterApp();
+    }
+
+    function enterApp() {
+      // Hide auth pages
+      document.getElementById('login-page').classList.remove('active');
+      document.getElementById('signup-page').classList.remove('active');
+
+      // Show main app
+      const app = document.getElementById('main-app');
+      app.classList.add('active');
+
+      // Set user display
+      const initials = currentUser.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+      document.getElementById('user-avatar').textContent = initials;
+      document.getElementById('user-name-display').textContent = currentUser.name;
+
+      // Pre-fill name fields with logged-in user's name
+      const nameFields = ['camp-name', 'vol-name', 'donor-name', 'contact-name', 'comp-name'];
+      nameFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && !el.value) el.value = currentUser.name;
+      });
+
+      // Start weather
+      initWeather();
+    }
+
+    function doLogout() {
+      currentUser = null;
+      document.getElementById('main-app').classList.remove('active');
+      document.getElementById('login-page').classList.add('active');
+      clearErrors();
+      document.getElementById('login-email').value = '';
+      document.getElementById('login-password').value = '';
+    }
+
+    // ════════════════════════════════════════════════════════
+    // DASHBOARD TAB NAVIGATION
+    // ════════════════════════════════════════════════════════
     let current = 'home';
 
     const footerMap = {
-      home:         null,
-      awareness:    null,
-      disasterinfo: null,
-      camp:         { ghost: 'Reset', primary: 'Request Admission' },
-      service:      { ghost: 'Reset', primary: 'Register as Volunteer' },
-      donate:       { ghost: 'Reset', primary: 'Donate Now' },
-      contact:      { ghost: 'Reset', primary: 'Send Message' },
-      complaint:    { ghost: 'Reset', primary: 'Submit Complaint' },
+      home: null, awareness: null, disasterinfo: null,
+      camp:      { ghost: 'Reset', primary: 'Request Admission' },
+      service:   { ghost: 'Reset', primary: 'Register as Volunteer' },
+      donate:    { ghost: 'Reset', primary: 'Donate Now' },
+      contact:   { ghost: 'Reset', primary: 'Send Message' },
+      complaint: { ghost: 'Reset', primary: 'Submit Complaint' },
     };
 
     const tabIds = ['home','awareness','disasterinfo','camp','service','donate','contact','complaint'];
@@ -1048,21 +1097,26 @@
 
     function handlePrimary() {
       const actions = {
-        camp:      submitCamp,
-        service:   submitVolunteer,
-        donate:    submitDonate,
-        contact:   submitContact,
-        complaint: submitComplaint,
+        camp: submitCamp, service: submitVolunteer,
+        donate: submitDonate, contact: submitContact, complaint: submitComplaint,
       };
       if (actions[current]) actions[current]();
     }
 
+    // ════════════════════════════════════════════════════════
+    // TOAST
+    // ════════════════════════════════════════════════════════
     function toast(msg) {
       const el = document.getElementById('toast');
       el.textContent = msg;
       el.classList.add('show');
       setTimeout(() => el.classList.remove('show'), 2800);
     }
+
+    // ════════════════════════════════════════════════════════
+    // API CALLS  — change BASE to your Azure Function URL
+    // ════════════════════════════════════════════════════════
+    const BASE = 'https://YOUR-APP.azurewebsites.net/api';
 
     async function postData(url, data) {
       try {
@@ -1078,7 +1132,7 @@
       const name   = document.getElementById('camp-name').value.trim();
       const people = document.getElementById('camp-people').value.trim();
       if (!name || !people) { toast('Please fill in your name and number of people.'); return; }
-      postData('http://localhost:3000/camp', { name, people });
+      postData(`${BASE}/camp`, { name, people });
       toast('Camp admission requested successfully!');
       resetActive();
     }
@@ -1087,7 +1141,7 @@
       const name  = document.getElementById('vol-name').value.trim();
       const phone = document.getElementById('vol-phone').value.trim();
       if (!name || !phone) { toast('Please fill in your name and phone number.'); return; }
-      postData('http://localhost:3000/volunteer', { name, phone });
+      postData(`${BASE}/volunteer`, { name, phone });
       toast('Volunteer registration submitted — thank you!');
       resetActive();
     }
@@ -1096,7 +1150,7 @@
       const name   = document.getElementById('donor-name').value.trim();
       const amount = document.getElementById('donor-amount').value.trim();
       if (!name || !amount) { toast('Please fill in your name and donation amount.'); return; }
-      postData('http://localhost:3000/donate', { name, amount });
+      postData(`${BASE}/donate`, { name, amount });
       toast('Donation submitted — thank you for your generosity!');
       resetActive();
     }
@@ -1105,7 +1159,7 @@
       const name = document.getElementById('contact-name').value.trim();
       const msg  = document.getElementById('contact-msg').value.trim();
       if (!name || !msg) { toast('Please fill in your name and message.'); return; }
-      postData('http://localhost:3000/contact', { name, msg });
+      postData(`${BASE}/contact`, { name, msg });
       toast('Message sent successfully!');
       resetActive();
     }
@@ -1114,13 +1168,15 @@
       const name = document.getElementById('comp-name').value.trim();
       const msg  = document.getElementById('comp-msg').value.trim();
       if (!name || !msg) { toast('Please fill in all required fields.'); return; }
-      postData('http://localhost:3000/complaint', { name, msg });
+      postData(`${BASE}/complaint`, { name, msg });
       toast('Complaint submitted successfully!');
       resetActive();
     }
 
-    (function initWeather() {
-      const OW_KEY   = '28cb87d1219a34db59e782c07aa8b8dd';
+    // ════════════════════════════════════════════════════════
+    // WEATHER WIDGET
+    // ════════════════════════════════════════════════════════
+    function initWeather() {
       const FALLBACK = { lat: 11.2588, lon: 75.7804 };
       const widget   = document.getElementById('weather-widget');
       const tempEl   = document.getElementById('weather-temp');
@@ -1128,10 +1184,8 @@
       const iconEl   = document.getElementById('weather-icon');
 
       async function fetchWeather(lat, lon) {
-        const url =
-          `https://api.openweathermap.org/data/2.5/weather` +
-          `?lat=${lat}&lon=${lon}&units=metric&appid=${OW_KEY}`;
-        const res = await fetch(url);
+        // Calls your backend weather proxy (keeps API key secure)
+        const res = await fetch(`${BASE}/weather?lat=${lat}&lon=${lon}`);
         if (!res.ok) throw new Error(`API ${res.status}`);
         return res.json();
       }
@@ -1142,73 +1196,96 @@
         if (id >= 300 && id < 600) return 'wx-rain';
         if (id >= 600 && id < 700) return 'wx-snow';
         if (id >= 700 && id < 800) return 'wx-haze';
-        if (id === 800)            return night ? 'wx-night' : 'wx-sunny';
-        if (id  >  800)            return night ? 'wx-night' : 'wx-cloudy';
+        if (id === 800) return night ? 'wx-night' : 'wx-sunny';
+        if (id  >  800) return night ? 'wx-night' : 'wx-cloudy';
         return 'wx-cloudy';
       }
 
       function renderWeather(data) {
-        const temp      = Math.round(data.main.temp);
-        const condition = data.weather[0].main;
-        const city      = data.name || 'Your Location';
-        const iconCode  = data.weather[0].icon;
-        const wxId      = data.weather[0].id;
-
+        const temp     = Math.round(data.main.temp);
+        const cond     = data.weather[0].main;
+        const city     = data.name || 'Your Location';
+        const iconCode = data.weather[0].icon;
+        const wxId     = data.weather[0].id;
         tempEl.textContent = `${temp}°C`;
-        metaEl.textContent = `${condition} · ${city}`;
-        iconEl.src         = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
-        iconEl.alt         = condition;
-
+        metaEl.textContent = `${cond} · ${city}`;
+        iconEl.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+        iconEl.alt = cond;
         const wxClass = conditionClass(wxId, iconCode);
-        widget.classList.remove(
-          'loading','error',
-          'wx-sunny','wx-cloudy','wx-rain','wx-storm','wx-snow','wx-haze','wx-night'
-        );
+        widget.classList.remove('loading','error','wx-sunny','wx-cloudy','wx-rain','wx-storm','wx-snow','wx-haze','wx-night');
         widget.classList.add(wxClass);
-
-        const feels = Math.round(data.main.feels_like);
-        const hum   = data.main.humidity;
-        widget.title =
-          `${city}: ${temp}°C (feels ${feels}°C) · ${data.weather[0].description} · Humidity ${hum}%`;
+        widget.title = `${city}: ${temp}°C · ${data.weather[0].description}`;
       }
 
       function renderError() {
         widget.classList.remove('loading');
         widget.classList.add('error');
-        iconEl.src         = '';
-        iconEl.alt         = '';
+        iconEl.src = ''; iconEl.alt = '';
         tempEl.textContent = 'Weather unavailable';
-        widget.title       = 'Could not load weather data';
       }
 
-      function loadWithCoords(lat, lon) {
-        fetchWeather(lat, lon)
-          .then(renderWeather)
-          .catch(renderError);
+      function load(lat, lon) {
+        fetchWeather(lat, lon).then(renderWeather).catch(renderError);
       }
 
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          pos => loadWithCoords(pos.coords.latitude, pos.coords.longitude),
-          ()  => loadWithCoords(FALLBACK.lat, FALLBACK.lon),
+          pos => load(pos.coords.latitude, pos.coords.longitude),
+          ()  => load(FALLBACK.lat, FALLBACK.lon),
           { timeout: 6000, maximumAge: 300000 }
         );
       } else {
-        loadWithCoords(FALLBACK.lat, FALLBACK.lon);
+        load(FALLBACK.lat, FALLBACK.lon);
       }
 
       setInterval(() => {
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
-            pos => loadWithCoords(pos.coords.latitude, pos.coords.longitude),
-            ()  => loadWithCoords(FALLBACK.lat, FALLBACK.lon),
+            pos => load(pos.coords.latitude, pos.coords.longitude),
+            ()  => load(FALLBACK.lat, FALLBACK.lon),
             { timeout: 6000, maximumAge: 300000 }
           );
         } else {
-          loadWithCoords(FALLBACK.lat, FALLBACK.lon);
+          load(FALLBACK.lat, FALLBACK.lon);
         }
       }, 10 * 60 * 1000);
-    })();
+    }
+
+    // ════════════════════════════════════════════════════════
+    // BINARY RAIN CANVAS  (runs on both auth pages)
+    // ════════════════════════════════════════════════════════
+    function startBinaryRain(canvas) {
+      const ctx   = canvas.getContext('2d');
+      const chars = '01';
+      const fs    = 10;
+      let drops   = [];
+
+      function resize() {
+        canvas.width  = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        drops = Array(Math.floor(canvas.width / fs)).fill(1);
+      }
+
+      function draw() {
+        ctx.fillStyle = 'rgba(17,17,17,0.12)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#c8c8b0';
+        ctx.font = `${fs}px monospace`;
+        drops.forEach((y, i) => {
+          ctx.fillText(chars[Math.random() > 0.5 ? 1 : 0], i * fs, y * fs);
+          if (y * fs > canvas.height && Math.random() > 0.975) drops[i] = 0;
+          drops[i]++;
+        });
+      }
+
+      resize();
+      window.addEventListener('resize', resize);
+      setInterval(draw, 60);
+    }
+
+    // Start canvas on both pages
+    startBinaryRain(document.getElementById('binaryCanvas'));
+    startBinaryRain(document.getElementById('binaryCanvas2'));
   </script>
 </body>
 </html>
